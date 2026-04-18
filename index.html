@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HPSC Comprehensive Study Notes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Chosen Palette: Slate and Emerald (Minimalist & Academic) -->
+    <!-- Application Structure Plan: The SPA uses a sidebar/top-nav layout to categorize the dense study material into logical, digestible sections (History, Culture, Geography, Admin, Current Affairs, Quiz). This prevents cognitive overload compared to a scrolling PDF. A dynamic tab system allows quick jumps between topics. An interactive quiz section is implemented to test knowledge immediately after reading. A chart is used in the Administration section to visualize district distribution. -->
+    <!-- Visualization & Content Choices: 
+         - Goal: Organize -> Method: Tabbed Navigation -> Interaction: Click to switch views -> Library: Vanilla JS. 
+         - Goal: Inform/Organize -> Method: Bulleted Pointers -> Interaction: Scrolling within focused sections -> Library: HTML/Tailwind. 
+         - Goal: Compare -> Method: Polar Area Chart (Divisions) -> Interaction: Hover tooltips -> Library: Chart.js (NO SVG/Mermaid used). 
+         - Goal: Test Knowledge -> Method: Interactive MCQ Quiz -> Interaction: Select radio buttons, click submit for instant grading -> Library: Vanilla JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 640px) {
+            .chart-container { height: 300px; }
+        }
+        
+        .quiz-option input[type="radio"]:checked + span {
+            background-color: #d1fae5;
+            border-color: #059669;
+            color: #065f46;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row">
+
+    <nav class="w-full md:w-64 bg-slate-900 text-slate-300 md:min-h-screen flex flex-col shadow-xl sticky top-0 md:h-screen overflow-y-auto">
+        <div class="p-6 bg-slate-950">
+            <h1 class="text-2xl font-bold text-white tracking-tight">HPSC Study<span class="text-emerald-500">Hub</span></h1>
+            <p class="text-xs mt-2 text-slate-400">Comprehensive Notes & MCQs</p>
+        </div>
+        <div class="flex flex-row md:flex-col overflow-x-auto md:overflow-x-hidden p-4 gap-2 font-medium" id="nav-menu">
+            <button onclick="switchTab('history')" class="nav-btn active text-left px-4 py-3 rounded-lg bg-emerald-600 text-white transition-colors whitespace-nowrap md:whitespace-normal">📜 History & Sources</button>
+            <button onclick="switchTab('culture')" class="nav-btn text-left px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors whitespace-nowrap md:whitespace-normal">🎭 Art & Culture</button>
+            <button onclick="switchTab('geography')" class="nav-btn text-left px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors whitespace-nowrap md:whitespace-normal">🌳 Geography & Sites</button>
+            <button onclick="switchTab('admin')" class="nav-btn text-left px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors whitespace-nowrap md:whitespace-normal">⚙️ Administration</button>
+            <button onclick="switchTab('current')" class="nav-btn text-left px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors whitespace-nowrap md:whitespace-normal">📰 Current Affairs</button>
+            <button onclick="switchTab('quiz')" class="nav-btn text-left px-4 py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 transition-colors mt-0 md:mt-4 whitespace-nowrap md:whitespace-normal">📝 Practice MCQs</button>
+        </div>
+    </nav>
+
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto w-full max-w-5xl mx-auto">
+
+        <section id="history" class="tab-content active">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-slate-500 mb-6 italic border-l-4 border-emerald-500 pl-4">This section outlines the ancient, medieval, and modern historical sources that reconstruct Haryana's past, focusing on literary texts and key historical events.</p>
+                
+                <h2 class="text-3xl font-bold text-slate-900 mb-6 border-b pb-2 border-slate-200">Ancient History & Literary Sources</h2>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">1. Epics and Puranic References</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">Mahabharata:</strong> Mentions 'Nakula Digvijaya' detailing Nakula's expedition to Rohtak.</li>
+                    <li><strong class="text-slate-900">Vaman Purana:</strong> Refers to the region as "Kuru Jangala".</li>
+                    <li><strong class="text-slate-900">Vaman Purana Details:</strong> Specifically outlines 7 forests (Kamyak, Aditi, Vyas, Dvait, Surya, Phalki, Sheet) and 9 rivers (Saraswati, Apaga, Vaithrani, Mandakini, Madhushrava, Drishadvati, Hiranyavati, Kaushiki).</li>
+                    <li><strong class="text-slate-900">Manu Smriti:</strong> Refers to Haryana as "Brahmavarta" (The Northern Altar of Brahma / Brahm ki Uttarvedi).</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">2. Buddhist and Jain Literature</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">Divyavadana (Buddhist):</strong> Highlights the prosperity of Agroha and Rohtak; notes Rohtak residents as music lovers.</li>
+                    <li><strong class="text-slate-900">Majjhima Nikaya:</strong> Mentions Dhankot (Gurugram) as contemporary to Kurukshetra.</li>
+                    <li><strong class="text-slate-900">Manjusri-mula-kalpa:</strong> Describes Shrikantha Janapada and identifies its rulers as Vaishyas.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">3. Secular & Foreign Accounts</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">Ashtadhyayi (Panini):</strong> Labels the Yaudheya Gana as "Ayudhjivi" (those living by weapons).</li>
+                    <li><strong class="text-slate-900">Ashtadhyayi City Names:</strong> Kapishthala (Kaithal), Sarishaka (Sirsa), Kausalya (Tohana), and Kalakuta (Kalka).</li>
+                    <li><strong class="text-slate-900">Harshacharita (Banabhatta):</strong> Refers to the area as Shrikantha Janapada with Thanesar as capital.</li>
+                    <li><strong class="text-slate-900">Rajatarangini (Kalhana):</strong> Records conquest by Kashmiri King Lalitaditya Muktapida and highlights wealthy merchants of Rohtak.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">4. Historical Events & Figures</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">First War of Panipat:</strong> Conflict between Babur and Ibrahim Lodi. Local rulers Hasan Khan Mewati and Hamid Khan participated.</li>
+                    <li><strong class="text-slate-900">Banda Singh Bahadur:</strong> Established Lohgarh as the first capital for his Sikh forces.</li>
+                    <li><strong class="text-slate-900">George Thomas:</strong> Known as "Jahazi Sahib", established his stronghold in Hansi.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="culture" class="tab-content">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-slate-500 mb-6 italic border-l-4 border-emerald-500 pl-4">Details the rich cultural heritage of Haryana, including key literary figures, traditional folk dances, and cultural identifiers necessary for the Prelims.</p>
+
+                <h2 class="text-3xl font-bold text-slate-900 mb-6 border-b pb-2 border-slate-200">Haryana Culture & Folk Arts</h2>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">1. Prominent Personalities in Literature & Art</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">Pandit Lakhmi Chand:</strong> Renowned as the "Shakespeare of Haryana" and "Surya Kavi".</li>
+                    <li><strong class="text-slate-900">Lakhmi Chand Details:</strong> Born in Janti village (Sonipat). His guru was Pandit Mansingh.</li>
+                    <li><strong class="text-slate-900">Udaybhanu Hans:</strong> Recognized as the First State Poet of Haryana and a pioneer of the Rubai form.</li>
+                    <li><strong class="text-slate-900">Dayachand Mayna:</strong> Celebrated as the "John Milton of Haryana".</li>
+                    <li><strong class="text-slate-900">Ali Baksh:</strong> Considered the Father of Folk Theater in the state.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">2. Traditional Folk Dances</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">Lur Dance:</strong> Performed exclusively by women during the Phalgun month just before Holi. Also known as Tunmunia.</li>
+                    <li><strong class="text-slate-900">Ratwai Dance:</strong> The traditional dance of the Mewat region, typically performed during the rainy season.</li>
+                    <li><strong class="text-slate-900">Jhoomar Dance:</strong> Popularly known as the "Haryanvi Gidda". It is named after a specific ornament worn by married women.</li>
+                    <li><strong class="text-slate-900">Ghoomar Dance:</strong> Predominantly performed by women in southern Haryana, especially in districts sharing a border with Rajasthan.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="geography" class="tab-content">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-slate-500 mb-6 italic border-l-4 border-emerald-500 pl-4">Focuses on physical landmarks, ancient archaeological excavations, and significant environmental and conservation sites across Haryana.</p>
+
+                <h2 class="text-3xl font-bold text-slate-900 mb-6 border-b pb-2 border-slate-200">Historical Landmarks, Archaeology & Environment</h2>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">1. Archaeological Sites</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">Mitathal (Bhiwani):</strong> Major Harappan site excavated by Dr. Surajbhan (Panjab University).</li>
+                    <li><strong class="text-slate-900">Mitathal Discoveries:</strong> Revealed roads arranged in a chessboard pattern and unique animal artifacts.</li>
+                    <li><strong class="text-slate-900">Brahma Sarovar:</strong> Ancient water body excavated by the Kurus; notably mentioned in the accounts of Al-Biruni.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">2. Monuments & Landmarks</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">Chor Gumbad (Narnaul):</strong> Built by Afghan Jamal Khan.</li>
+                    <li><strong class="text-slate-900">Chor Gumbad Features:</strong> Distinct square shape; historically used as a hideout for thieves; colloquially called the "Notice Board of Narnaul".</li>
+                    <li><strong class="text-slate-900">Fairy Queen:</strong> Located in Rewari, it is the world's oldest functional steam engine.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">3. Environment & Conservation</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">Bhindawas:</strong> Recognized as the largest wetland in Haryana.</li>
+                    <li><strong class="text-slate-900">Sultanpur:</strong> Achieved the prestigious Ramsar Site status in the year 2021.</li>
+                    <li><strong class="text-slate-900">Vulture Conservation:</strong> Jatayu Conservation Breeding Center plays a crucial role in global vulture preservation.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="admin" class="tab-content">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-slate-500 mb-6 italic border-l-4 border-emerald-500 pl-4">Provides statistical and structural details regarding Haryana's modern and historical administrative setup, visualized for quick retention.</p>
+
+                <h2 class="text-3xl font-bold text-slate-900 mb-6 border-b pb-2 border-slate-200">Administration & Key Milestones</h2>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-8 bg-slate-50 p-6 rounded-xl">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-4">Divisional Breakdown</h3>
+                        <p class="text-sm text-slate-600 mb-4">Haryana is currently divided into 6 administrative divisions. The chart visualizes the distribution of the 22 districts among these 6 divisions to help understand the administrative density.</p>
+                        <ul class="text-sm space-y-2 text-slate-700">
+                            <li>📍 <strong>Rohtak:</strong> 5 Districts (Largest division by district count)</li>
+                            <li>📍 <strong>Ambala:</strong> 4 Districts</li>
+                            <li>📍 <strong>Gurugram:</strong> 3 Districts</li>
+                            <li>📍 <strong>Hisar:</strong> 4 Districts</li>
+                            <li>📍 <strong>Karnal:</strong> 3 Districts</li>
+                            <li>📍 <strong>Faridabad:</strong> 3 Districts</li>
+                        </ul>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="divisionChart"></canvas>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">1. Historical Administration</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">First Iqta:</strong> Established by Iltutmish in the city of Hansi.</li>
+                    <li><strong class="text-slate-900">Smallest Iqta:</strong> Recorded in Palwal.</li>
+                    <li><strong class="text-slate-900">Yaudheya Gana:</strong> An ancient republic that emerged following the fall of the Mauryan Empire.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">2. Modern Administration & Infrastructure</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">Police Setup:</strong> Haryana has 5 Police Commissionerates. (Note: Rohtak, Jhajjar, Chandigarh are NOT Police Commissionerates).</li>
+                    <li><strong class="text-slate-900">Legislative Assembly:</strong> Shanno Devi was the 1st Speaker. H.S. Chaddha holds the record for maximum speakership duration.</li>
+                    <li><strong class="text-slate-900">Rural Electrification (1970):</strong> Under CM Bansi Lal, Haryana achieved 100% rural electrification. The final village was Uchani Kalan.</li>
+                    <li><strong class="text-slate-900">National Security Guard (NSG):</strong> Operational headquarters located in Manesar (Under Union Ministry of Home Affairs).</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="current" class="tab-content">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-slate-500 mb-6 italic border-l-4 border-emerald-500 pl-4">Added value section: Recent developments, schemes, and milestones in Haryana relevant for current affairs in the HPSC examination.</p>
+
+                <h2 class="text-3xl font-bold text-slate-900 mb-6 border-b pb-2 border-slate-200">Current Affairs (Haryana Special)</h2>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">Governance & Schemes</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">Parivar Pehchan Patra (PPP):</strong> Haryana's unique 8-digit family identity document, acting as the primary mechanism for delivering welfare schemes and services directly to eligible families.</li>
+                    <li><strong class="text-slate-900">e-Adhigam Scheme:</strong> Launched to distribute tablets to government school students (Classes 10-12) to promote digital education and minimize the digital divide.</li>
+                    <li><strong class="text-slate-900">Chirayu Haryana Yojana:</strong> An extension of Ayushman Bharat to provide health cover of Rs 5 lakh to families with an annual income up to Rs 1.80 lakh as verified by the PPP.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">Infrastructure & Heritage</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">Rakhigarhi Museum:</strong> The ASI and state government are aggressively developing Rakhigarhi (Hisar) into a world-class museum to showcase the largest Indus Valley Civilization site.</li>
+                    <li><strong class="text-slate-900">Global City Project:</strong> A massive mixed-land-use project being developed in Gurugram to act as a central business district of international standards.</li>
+                    <li><strong class="text-slate-900">Aravalli Safari Park:</strong> Announced to be developed across Gurugram and Nuh districts, aiming to be the largest jungle safari park outside Africa, boosting eco-tourism and conservation.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-3">Sports Achievements</h3>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong class="text-slate-900">Asian Games Contribution:</strong> Athletes from Haryana consistently secured over 30% of India's total medals in recent Asian and Olympic games, cementing the state's status as India's sporting powerhouse.</li>
+                    <li><strong class="text-slate-900">Khelo India:</strong> Haryana consistently ranks in the top two states in the Khelo India Youth Games medal tally.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="quiz" class="tab-content">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-slate-500 mb-6 italic border-l-4 border-emerald-500 pl-4">Test your retention of the notes with these 20 HPSC-style Multiple Choice Questions. Select your answers and click submit at the bottom to see your score.</p>
+
+                <h2 class="text-3xl font-bold text-slate-900 mb-6 border-b pb-2 border-slate-200">HPSC Practice Mock Test</h2>
+                
+                <div id="quiz-container" class="space-y-8"></div>
+
+                <div class="mt-8 pt-6 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center">
+                    <button onclick="submitQuiz()" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition-all w-full md:w-auto">Submit Test</button>
+                    <div id="quiz-result" class="text-2xl font-bold text-slate-800 mt-4 md:mt-0 hidden"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const quizData = [
+            { q: "Which ancient text refers to the Yaudheya Gana as 'Ayudhjivi'?", options: ["Vaman Purana", "Ashtadhyayi", "Divyavadana", "Rajatarangini"], ans: 1 },
+            { q: "Which text mentions 7 forests and 9 rivers of Haryana?", options: ["Mahabharata", "Harshacharita", "Vaman Purana", "Manu Smriti"], ans: 2 },
+            { q: "The region of Haryana is referred to as 'Brahm ki Uttarvedi' in which text?", options: ["Manu Smriti", "Ashtadhyayi", "Divyavadana", "Majjhima Nikaya"], ans: 0 },
+            { q: "Who is celebrated as the 'John Milton of Haryana'?", options: ["Udaybhanu Hans", "Lakhmi Chand", "Dayachand Mayna", "Ali Baksh"], ans: 2 },
+            { q: "Pandit Lakhmi Chand, known as the Shakespeare of Haryana, was born in which village?", options: ["Meethathal", "Janti", "Uchani Kalan", "Palwal"], ans: 1 },
+            { q: "Which wetland in Haryana achieved Ramsar Site status in 2021?", options: ["Bhindawas", "Sultanpur", "Basai", "Kalesar"], ans: 1 },
+            { q: "The Harappan site of Meethathal, where roads in a chessboard pattern were found, is located in:", options: ["Bhiwani", "Hisar", "Rohtak", "Sirsa"], ans: 0 },
+            { q: "Which city was established as the first Iqta by Iltutmish in Haryana?", options: ["Rohtak", "Thanesar", "Hansi", "Palwal"], ans: 2 },
+            { q: "Identify the district that is NOT a Police Commissionerate in Haryana:", options: ["Faridabad", "Gurugram", "Rohtak", "Sonipat"], ans: 2 },
+            { q: "Which dance form is predominantly performed by women in southern Haryana, particularly near the Rajasthan border?", options: ["Lur", "Ratwai", "Ghoomar", "Jhoomar"], ans: 2 },
+            { q: "Under whose Chief Ministership did Haryana achieve 100% rural electrification in 1970?", options: ["Bhajan Lal", "Bansi Lal", "Devi Lal", "Rao Birender Singh"], ans: 1 },
+            { q: "The Chor Gumbad, known as the 'Notice Board of Narnaul', was built by:", options: ["Hasan Khan", "Ibrahim Lodi", "Jamal Khan", "Babur"], ans: 2 },
+            { q: "Which historic site served as the first capital for the Sikh forces of Banda Singh Bahadur?", options: ["Thanesar", "Lohgarh", "Kapishthala", "Kalka"], ans: 1 },
+            { q: "The 'Fairy Queen', the world's oldest functional steam engine, is preserved in:", options: ["Ambala", "Kalka", "Rewari", "Faridabad"], ans: 2 },
+            { q: "Which text describes the region as Shrikantha Janapada with its capital at Thanesar?", options: ["Harshacharita", "Ashtadhyayi", "Rajatarangini", "Manjusri-mula-kalpa"], ans: 0 },
+            { q: "Who was the first Speaker of the Haryana Legislative Assembly?", options: ["H.S. Chaddha", "Bansi Lal", "Shanno Devi", "Udaybhanu Hans"], ans: 2 },
+            { q: "The Jatayu Conservation Breeding Center in Haryana is dedicated to the preservation of:", options: ["Tigers", "Vultures", "Blackbucks", "Elephants"], ans: 1 },
+            { q: "George Thomas, who established his stronghold in Hansi, was popularly known as:", options: ["Surya Kavi", "Ayudhjivi", "Jahazi Sahib", "Father of Folk Theater"], ans: 2 },
+            { q: "The Ratwai dance is the traditional dance of which region?", options: ["Mewat", "Rohtak", "Sirsa", "Ambala"], ans: 0 },
+            { q: "What was the name of the final village electrified in 1970 to achieve the 100% target?", options: ["Janti", "Uchani Kalan", "Meethathal", "Dhankot"], ans: 1 }
+        ];
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('bg-emerald-600', 'text-white', 'bg-indigo-600');
+                if(!el.classList.contains('active')) {
+                    el.classList.add('hover:bg-slate-800');
+                }
+            });
+            
+            const targetContent = document.getElementById(tabId);
+            targetContent.classList.add('active');
+            
+            const btn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
+            if(tabId === 'quiz') {
+                btn.classList.add('bg-indigo-600', 'text-white');
+                btn.classList.remove('hover:bg-slate-800');
+            } else {
+                btn.classList.add('bg-emerald-600', 'text-white');
+                btn.classList.remove('hover:bg-slate-800');
+            }
+
+            if(tabId === 'admin' && !window.chartRendered) {
+                renderChart();
+                window.chartRendered = true;
+            }
+            window.scrollTo(0,0);
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('divisionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'polarArea',
+                data: {
+                    labels: ['Rohtak', 'Ambala', 'Hisar', 'Gurugram', 'Karnal', 'Faridabad'],
+                    datasets: [{
+                        label: 'Number of Districts',
+                        data: [5, 4, 4, 3, 3, 3],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(5, 150, 105, 0.7)',
+                            'rgba(4, 120, 87, 0.7)',
+                            'rgba(52, 211, 153, 0.7)',
+                            'rgba(110, 231, 183, 0.7)',
+                            'rgba(209, 250, 229, 0.7)'
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ' Division: ' + context.raw + ' Districts';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: { ticks: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            let html = '';
+            quizData.forEach((q, index) => {
+                html += `
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200" id="q-block-${index}">
+                    <p class="font-semibold text-lg text-slate-800 mb-4"><span class="text-emerald-600 mr-2">Q${index + 1}.</span> ${q.q}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                `;
+                q.options.forEach((opt, oIndex) => {
+                    html += `
+                        <label class="quiz-option cursor-pointer relative">
+                            <input type="radio" name="q${index}" value="${oIndex}" class="peer sr-only">
+                            <span class="block px-4 py-3 border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors peer-focus:ring-2 peer-focus:ring-emerald-500">
+                                ${String.fromCharCode(65 + oIndex)}. ${opt}
+                            </span>
+                        </label>
+                    `;
+                });
+                html += `
+                    </div>
+                    <div id="exp-${index}" class="hidden mt-4 p-3 rounded bg-white border text-sm font-medium"></div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function submitQuiz() {
+            let score = 0;
+            quizData.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                const expDiv = document.getElementById(`exp-${index}`);
+                expDiv.classList.remove('hidden');
+                
+                if (selected && parseInt(selected.value) === q.ans) {
+                    score++;
+                    expDiv.classList.add('border-emerald-200', 'text-emerald-700', 'bg-emerald-50');
+                    expDiv.classList.remove('border-red-200', 'text-red-700', 'bg-red-50');
+                    expDiv.innerHTML = `✅ Correct!`;
+                } else {
+                    expDiv.classList.add('border-red-200', 'text-red-700', 'bg-red-50');
+                    expDiv.classList.remove('border-emerald-200', 'text-emerald-700', 'bg-emerald-50');
+                    expDiv.innerHTML = `❌ Incorrect. The correct answer is: ${String.fromCharCode(65 + q.ans)}. ${q.options[q.ans]}`;
+                }
+            });
+            
+            const resDiv = document.getElementById('quiz-result');
+            resDiv.classList.remove('hidden');
+            const percentage = (score / quizData.length) * 100;
+            let colorClass = percentage >= 75 ? 'text-emerald-600' : (percentage >= 50 ? 'text-amber-500' : 'text-red-600');
+            resDiv.innerHTML = `Score: <span class="${colorClass}">${score} / ${quizData.length}</span>`;
+            resDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderQuiz();
+        });
+    </script>
+</body>
+</html>
